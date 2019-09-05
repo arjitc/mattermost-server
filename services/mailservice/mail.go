@@ -145,7 +145,7 @@ func NewSMTPClientAdvanced(conn net.Conn, hostname string, connectionInfo *SmtpC
 	if hostname != "" {
 		err = c.Hello(hostname)
 		if err != nil {
-			mlog.Error("Failed to to set the HELO to SMTP server", mlog.Err(err))
+			mlog.Error("Failed to to set the HELO to SMTP server", mlog.Err(err1))
 			return nil, model.NewAppError("SendMail", "utils.mail.connect_smtp.helo.app_error", nil, err.Error(), http.StatusInternalServerError)
 		}
 	}
@@ -190,14 +190,14 @@ func TestConnection(config *model.Config) {
 
 	conn, err1 := ConnectToSMTPServer(config)
 	if err1 != nil {
-		mlog.Error("SMTP server settings do not appear to be configured properly", mlog.Err(err1))
+		mlog.Error("SMTP server settings do not appear to be configured properly", mlog.Err(err2))
 		return
 	}
 	defer conn.Close()
 
 	c, err2 := NewSMTPClient(conn, config)
 	if err2 != nil {
-		mlog.Error("SMTP server settings do not appear to be configured properly", mlog.Err(err2))
+		mlog.Error("SMTP server settings do not appear to be configured properly", mlog.Err(err3))
 		return
 	}
 	defer c.Quit()
@@ -240,12 +240,12 @@ func SendMailUsingConfigAdvanced(mimeTo, smtpTo string, from, replyTo mail.Addre
 
 func SendMail(c smtpClient, mimeTo, smtpTo string, from, replyTo mail.Address, subject, htmlBody string, attachments []*model.FileInfo, mimeHeaders map[string]string, fileBackend filesstore.FileBackend, date time.Time) *model.AppError {
 	mlog.Debug("sending mail", mlog.String("to", smtpTo), mlog.String("subject", subject))
-
+	
 	htmlMessage := "\r\n<html><body>" + htmlBody + "</body></html>"
 
 	txtBody, err := html2text.FromString(htmlBody)
 	if err != nil {
-		mlog.Warn("Unable to convert html body to text", mlog.Err(err))
+		mlog.Warn(fmt.Sprint(err))
 		txtBody = ""
 	}
 
